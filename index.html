@@ -582,6 +582,18 @@ const I18N = {
   'fb.landingSignIn': ['Editors: sign in to open the schedule.', 'للمحرّرين: سجّل الدخول لفتح الجدول.'],
   'fb.viewersHint': ['Only need to view? Open the schedule link you were given — no sign-in needed.', 'تحتاج إلى العرض فقط؟ افتح رابط الجدول الذي حصلت عليه، دون تسجيل دخول.'],
   'fb.checking': ['One moment…', 'لحظة من فضلك…'],
+  'fb.err.details': ['Details', 'التفاصيل'],
+  'fb.pwNotSaved': ['not saved', 'غير محفوظة'],
+  'fb.pwNotSavedHelp': ['This person was added before passwords were saved, or already had an account.', 'أُضيف هذا الشخص قبل حفظ كلمات المرور، أو كان لديه حساب مسبقاً.'],
+  'fb.pwColumnNote': ['Passwords are the ones created here. If someone changes theirs (for example with “Forgot password?”), this column is not updated. Only admins can see this list.', 'كلمات المرور هي التي أُنشئت هنا. إذا غيّر أحدهم كلمة مروره (مثلاً عبر «نسيت كلمة المرور؟») فلن يتحدّث هذا العمود. هذه القائمة يراها المسؤولون فقط.'],
+  'fb.inviteCopiedNoPw': ['Invitation copied without a password (none saved). They use their own password or “Forgot password?”.', 'تم نسخ الدعوة دون كلمة مرور (لا توجد كلمة محفوظة). يستخدم كلمة مروره أو «نسيت كلمة المرور؟».'],
+  'fb.adminOnlyAction': ['Only admins can load demo data, import backups, restore or reset the schedule.', 'تحميل البيانات التجريبية واستيراد النسخ الاحتياطية والاستعادة وإعادة الضبط متاحة للمسؤولين فقط.'],
+  'fb.err.anonymous': ['Firebase refused the sign-in for viewers. Fix: Firebase console → Authentication → Sign-in method → Anonymous → turn it on → Save. Then reload this page.', 'رفض Firebase تسجيل دخول المشاهدين. الحل: وحدة تحكم Firebase ← Authentication ← Sign-in method ← Anonymous ← فعّله ← Save. ثم أعد تحميل الصفحة.'],
+  'fb.err.authNotStarted': ['Authentication is not set up in this Firebase project yet. Fix: Firebase console → Authentication → click “Get started”, then turn on Anonymous, Email/Password and Google. Then reload this page.', 'لم يتم إعداد Authentication في مشروع Firebase بعد. الحل: وحدة تحكم Firebase ← Authentication ← اضغط «Get started»، ثم فعّل Anonymous وEmail/Password وGoogle. ثم أعد تحميل الصفحة.'],
+  'fb.err.apiKey': ['The apiKey in firebase-config.js is not valid. Copy it again from Firebase → Project settings → Your apps.', 'قيمة apiKey في firebase-config.js غير صحيحة. انسخها مجدداً من Firebase ← Project settings ← Your apps.'],
+  'fb.err.domain': ['Firebase does not allow this web address yet. Fix: Firebase console → Authentication → Settings → Authorized domains → add this site’s domain. Then reload.', 'لا يسمح Firebase بهذا العنوان بعد. الحل: وحدة تحكم Firebase ← Authentication ← Settings ← Authorized domains ← أضف نطاق هذا الموقع. ثم أعد التحميل.'],
+  'fb.err.network': ['The page could not load Firebase. Check your internet connection, and turn off any ad blocker for this site, then reload.', 'تعذّر على الصفحة تحميل Firebase. تحقّق من اتصالك بالإنترنت وأوقف مانع الإعلانات لهذا الموقع، ثم أعد التحميل.'],
+  'fb.err.generic': ['Could not connect to Firebase. Check the steps in the README (section 0), then reload. If it still fails, send the details below for help.', 'تعذّر الاتصال بـ Firebase. راجع الخطوات في ملف README (القسم 0) ثم أعد التحميل. إذا استمرت المشكلة، أرسل التفاصيل أدناه للمساعدة.'],
   'fb.signedInAsShort': ['Signed in as {email}.', 'مسجّل الدخول باسم {email}.'],
   'fb.noAccess': ['This account has not been added as an editor yet. Ask the schedule’s admin to add you in the Editors tab.', 'لم تتم إضافة هذا الحساب كمحرّر بعد. اطلب من مسؤول الجدول إضافتك من تبويب «المحرّرون».'],
   'fb.noScheduleYet': ['There is no shared schedule yet. Set one up to get started.', 'لا يوجد جدول مشترك بعد. أنشئ جدولاً للبدء.'],
@@ -1778,7 +1790,11 @@ function undo() {
   state = normalizeData(JSON.parse(u.data)); stateVersion++; markDirty(); afterCommit('undo');
   return u.label;
 }
+/** Bulk changes (import, demo data, restore, reset) are for admins only in the shared online version. */
+function canBulkEdit() { return !(typeof FB !== 'undefined' && FB.active() && Cloud.active) || FB.isAdmin(); }
+function bulkBlocked() { if (canBulkEdit()) return false; if (typeof toast === 'function') toast(t('fb.adminOnlyAction'), { type: 'error' }); return true; }
 function replaceState(newState) {
+  if (bulkBlocked()) return;
   state = newState; stateVersion++; undoStack.length = 0; markDirty(); afterCommit('replace');
 }
 
@@ -1844,7 +1860,7 @@ const Cloud = {
       });
       this.active = true;
       return true;
-    } catch (e) { console.error('Shared store unavailable', e); return false; }
+    } catch (e) { console.error('Shared store unavailable', e); this.lastError = e; return false; }
   },
 
   /** Remote config arrived. Apply unless this view has edits not yet written. */
@@ -2092,7 +2108,7 @@ function render() {
     const v = VIEWS[ui.view] || VIEWS.dashboard;
     const app = document.getElementById('app');
     const roBanner = Cloud.active && Cloud.readOnly ? `<div class="banner info" style="margin-bottom:10px"><div class="grow">👁 ${esc(t('cloud.viewOnlyBanner'))}</div></div>` : '';
-    const emptyBanner = Cloud.active && Cloud.empty && !Cloud.readOnly && !state.events.length ? `<div class="banner warn" style="margin-bottom:10px"><div class="grow">${esc(t('cloud.emptyBanner'))}</div><button type="button" class="btn sm primary" data-act="cloud-seed-demo">${esc(t('demo.load'))}</button><button type="button" class="btn sm" data-act="import-backup">${esc(t('backup.import'))}</button></div>` : '';
+    const emptyBanner = Cloud.active && Cloud.empty && !Cloud.readOnly && !state.events.length && canBulkEdit() ? `<div class="banner warn" style="margin-bottom:10px"><div class="grow">${esc(t('cloud.emptyBanner'))}</div><button type="button" class="btn sm primary" data-act="cloud-seed-demo">${esc(t('demo.load'))}</button><button type="button" class="btn sm" data-act="import-backup">${esc(t('backup.import'))}</button></div>` : '';
     app.innerHTML = renderTopbar() + renderToolbar(v) + `<main id="main" tabindex="-1">${roBanner}${emptyBanner}${v.render()}</main>`;
     if (v.mount) v.mount();
     if (prevView === ui.view + ':' + ui.settingsTab) document.querySelectorAll('#main details').forEach((el, i) => { if (openDetails[i] !== undefined) el.open = openDetails[i]; });
@@ -2379,7 +2395,7 @@ VIEWS.dashboard = {
     const demoCount = state.events.filter(e => e.demo).length;
     return `
       <div class="view-head"><h1>${esc(t('nav.dashboard'))}<small>${esc(fmtDateLong(state.settings.marketStart))} – ${esc(fmtDateLong(state.settings.marketEnd))} · ${esc(t('misc.daysCount', { n: dates.length }))}</small></h1></div>
-      ${demoCount ? `<div class="banner demo"><span aria-hidden="true">🎭</span><div class="grow"><strong>${esc(t('demo.bannerTitle'))}</strong> ${esc(t('demo.bannerBody', { n: demoCount }))}</div><button type="button" class="btn sm" data-act="remove-demo">${esc(t('demo.remove'))}</button></div>` : ''}
+      ${demoCount ? `<div class="banner demo"><span aria-hidden="true">🎭</span><div class="grow"><strong>${esc(t('demo.bannerTitle'))}</strong> ${esc(t('demo.bannerBody', { n: demoCount }))}</div>${canBulkEdit() ? `<button type="button" class="btn sm" data-act="remove-demo">${esc(t('demo.remove'))}</button>` : ''}</div>` : ''}
       <p class="small muted dash-store">💾 ${esc(Cloud.active ? t('cloud.short') : t('store.short'))} ${state.meta.lastBackupAt ? esc(t('store.lastBackup', { when: new Date(state.meta.lastBackupAt).toLocaleString(locale()) })) : esc(t('store.noBackup'))} <button type="button" class="btn sm" data-act="export-backup">${esc(t('backup.export'))}</button></p>
       <div class="kpis">
         ${kpi(active.length, t('dash.scheduled'), esc(t('dash.stageRoam', { s: active.filter(e => e.type === 'stage').length, r: active.filter(e => e.type === 'roaming').length })))}
@@ -3312,8 +3328,10 @@ const FB = {
     } catch (e) { return this.authReason(e); }
     finally { try { await m.deleteApp(app2); } catch (e) { /* ignore */ } }
   },
-  async addMember(email, role) {
-    await this.m.setDoc(this.memberRef(email), { role: role === 'admin' ? 'admin' : 'editor', addedBy: this.email(), addedAt: new Date().toISOString() }).catch(e => { throw this.err(e); });
+  async addMember(email, role, password) {
+    const d = { role: role === 'admin' ? 'admin' : 'editor', addedBy: this.email(), addedAt: new Date().toISOString() };
+    if (password) d.password = password; // kept so admins can copy the invitation again later (only admins and that person can read it)
+    await this.m.setDoc(this.memberRef(email), d).catch(e => { throw this.err(e); });
   },
   async removeMember(email) { await this.m.deleteDoc(this.memberRef(email)).catch(e => { throw this.err(e); }); },
   /** Set up a new schedule. Only the owner can, signed in with Google. */
@@ -3337,6 +3355,17 @@ const FB = {
 };
 FB.board = FB.boardFromUrl();
 
+/** Plain explanation of why connecting to Firebase failed, with the fix. */
+function fbStartupHelp(e) {
+  const c = String((e && e.code) || ''), m = String((e && e.message) || e || '');
+  let k = 'fb.err.generic';
+  if (/admin-restricted-operation|operation-not-allowed/.test(c + m)) k = 'fb.err.anonymous';
+  else if (/configuration-not-found/.test(c + m)) k = 'fb.err.authNotStarted';
+  else if (/api-key-not-valid|invalid-api-key|API key not valid/i.test(c + m)) k = 'fb.err.apiKey';
+  else if (/unauthorized-domain|requests-from-referer|referer/i.test(c + m)) k = 'fb.err.domain';
+  else if (/network-request-failed|Failed to fetch|dynamically imported module|Importing a module/i.test(c + m)) k = 'fb.err.network';
+  return `<p>${esc(t(k))}</p><p class="small muted" dir="ltr" style="word-break:break-word">${esc(t('fb.err.details'))}: ${esc(c || '—')} ${esc(m.slice(0, 200))}</p>`;
+}
 /** Message for an authReason code. */
 function fbReasonText(r, msg) {
   const k = { bad: 'fb.badLogin', exists: 'fb.exists', weak: 'fb.pwShort', email: 'fb.badEmail', many: 'fb.tooMany', net: 'fb.network', disabled: 'fb.emailDisabled', notMember: 'fb.notMember', existsBad: 'fb.existsBad', popup: 'fb.popupBlocked', domain: 'fb.domain', otherMethod: 'fb.otherMethod', notOwner: 'fb.ownerOnly', cancel: 'fb.cancelled' }[r];
@@ -3435,8 +3464,9 @@ VIEWS.people = {
     const rows = people.map(p => `<tr>
         <td dir="ltr" style="text-align:start"><strong>${esc(p.email)}</strong>${p.email === me ? ` <span class="tag ack">${esc(t('fb.you'))}</span>` : ''}</td>
         <td>${esc(t('fb.role.' + (p.role === 'owner' ? 'owner' : p.role === 'admin' ? 'admin' : 'editor')))}</td>
+        <td dir="ltr" style="text-align:start">${p.role === 'owner' ? '' : p.password ? `<code style="font-size:12.5px;background:var(--surface);border:1px solid var(--line-2);border-radius:4px;padding:1px 6px;white-space:nowrap">${esc(p.password)}</code>` : `<span class="small muted" title="${esc(t('fb.pwNotSavedHelp'))}">${esc(t('fb.pwNotSaved'))}</span>`}</td>
         <td class="small muted">${p.addedAt ? esc(new Date(p.addedAt).toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: 'numeric' })) : ''}</td>
-        <td style="text-align:end;white-space:nowrap">${p.email === me || p.role === 'owner' ? '' : `<button type="button" class="btn sm" data-pp-reset="${esc(p.email)}">${esc(t('fb.sendReset'))}</button> <button type="button" class="btn sm danger" data-pp-remove="${esc(p.email)}">${esc(t('fb.remove'))}</button>`}</td></tr>`).join('');
+        <td style="text-align:end;white-space:nowrap">${p.email === me || p.role === 'owner' ? '' : `<button type="button" class="btn sm" data-pp-copy="${esc(p.email)}">📋 ${esc(t('fb.copyInvite'))}</button> <button type="button" class="btn sm" data-pp-reset="${esc(p.email)}">${esc(t('fb.sendReset'))}</button> <button type="button" class="btn sm danger" data-pp-remove="${esc(p.email)}">${esc(t('fb.remove'))}</button>`}</td></tr>`).join('');
     return `<div class="view-head"><h1>${esc(t('nav.people'))}<small>${esc(t('fb.peopleCount', { n: people.length }))}</small></h1></div>
       <p class="muted small" style="margin-top:0;max-width:760px">${esc(t('fb.peopleIntro'))}</p>
       ${invite}
@@ -3449,16 +3479,18 @@ VIEWS.people = {
         <p class="small muted" style="margin:8px 0 0">${esc(t('fb.roleHelp'))}</p>
         <p class="small" id="pp-err" style="color:var(--danger);min-height:1.4em;margin:6px 0 0" role="alert"></p>
       </div></section>
-      <section class="card" style="max-width:760px"><div class="card-h"><h2>${esc(t('fb.listTitle'))}</h2></div>
+      <section class="card" style="max-width:1000px"><div class="card-h"><h2>${esc(t('fb.listTitle'))}</h2></div>
         <div style="overflow-x:auto"><table class="tbl" style="width:100%;border-collapse:collapse">
-          <thead><tr><th style="text-align:start;padding:8px 14px">${esc(t('fb.email'))}</th><th style="text-align:start;padding:8px">${esc(t('fb.role'))}</th><th style="text-align:start;padding:8px">${esc(t('fb.added'))}</th><th></th></tr></thead>
-          <tbody>${rows || `<tr><td colspan="4" class="muted" style="padding:14px">${esc(t('fb.noPeople'))}</td></tr>`}</tbody></table></div></section>`;
+          <thead><tr><th style="text-align:start;padding:8px 14px">${esc(t('fb.email'))}</th><th style="text-align:start;padding:8px">${esc(t('fb.role'))}</th><th style="text-align:start;padding:8px">${esc(t('fb.password'))}</th><th style="text-align:start;padding:8px">${esc(t('fb.added'))}</th><th></th></tr></thead>
+          <tbody>${rows || `<tr><td colspan="5" class="muted" style="padding:14px">${esc(t('fb.noPeople'))}</td></tr>`}</tbody></table></div>
+        <p class="small muted" style="margin:0;padding:10px 14px;border-top:1px solid var(--line-2)">${esc(t('fb.pwColumnNote'))}</p></section>`;
   },
   mount() {
     if (!FB.active() || !FB.isAdmin()) return;
     const $m = s => document.querySelector('#main ' + s);
     document.querySelectorAll('#main tbody td').forEach(td => { td.style.padding = '8px'; td.style.borderTop = '1px solid var(--line-2)'; });
     document.querySelectorAll('#main tbody td:first-child').forEach(td => { td.style.paddingInlineStart = '14px'; });
+    document.querySelectorAll('#main tbody td:nth-child(2), #main tbody td:nth-child(4)').forEach(td => { td.style.whiteSpace = 'nowrap'; });
     const err = $m('#pp-err'), add = $m('#pp-add'), emIn = $m('#pp-email');
     const submit = async () => {
       const email = FB.cleanEmail(emIn.value), role = $m('#pp-role').value;
@@ -3469,7 +3501,7 @@ VIEWS.people = {
       const password = FB.suggestPassword();
       const r = await FB.createAccount(email, password);
       if (r !== 'created' && r !== 'exists') { add.disabled = false; render(); const e2 = document.querySelector('#main #pp-err'); if (e2) e2.textContent = fbReasonText(r); return; }
-      try { await FB.addMember(email, role); }
+      try { await FB.addMember(email, role, r === 'created' ? password : null); }
       catch (e) { add.disabled = false; render(); const e2 = document.querySelector('#main #pp-err'); if (e2) e2.textContent = t('fb.failed', { msg: e.message }); return; }
       fbLastInvite = { email, password: r === 'created' ? password : null, created: r === 'created' };
       render();
@@ -3488,6 +3520,11 @@ VIEWS.people = {
       if (!(await confirmDialog({ title: t('fb.removeTitle'), message: esc(t('fb.removeMsg', { email })), ok: t('fb.remove'), danger: true }))) return;
       try { await FB.removeMember(email); if (fbLastInvite && fbLastInvite.email === email) fbLastInvite = null; toast(t('fb.removed', { email })); }
       catch (e) { toast(t('fb.failed', { msg: e.message }), { type: 'error' }); }
+    }));
+    document.querySelectorAll('#main [data-pp-copy]').forEach(b => b.addEventListener('click', async () => {
+      const p = FB.members.find(x => x.email === b.dataset.ppCopy); if (!p) return;
+      const text = p.password ? FB.inviteText(p.email, p.password) : t('fb.inviteTextExisting', { link: FB.shareLink(), email: p.email });
+      if (await copyText(text)) toast(t(p.password ? 'fb.inviteCopied' : 'fb.inviteCopiedNoPw')); else toast(t('fb.copyFailed'), { type: 'error' });
     }));
     document.querySelectorAll('#main [data-pp-reset]').forEach(b => b.addEventListener('click', async () => {
       const email = b.dataset.ppReset;
@@ -3538,7 +3575,7 @@ async function renderLanding(msgKey) {
   renderLanding._msg = msgKey;
   if (msgKey === 'fb.notConfigured' || msgKey === 'fb.badLink') { landingShell(`<p style="text-align:center">${esc(t(msgKey))}</p>`); return; }
   landingShell(`<p style="text-align:center" class="muted">${esc(t('fb.checking'))}</p>`);
-  try { await FB.load(); } catch (e) { landingShell(`<p style="text-align:center">${esc(t('cloud.notConnected'))}</p>`); return; }
+  try { await FB.load(); } catch (e) { console.error('Firebase start failed', e); landingShell(`<div style="text-align:start">${fbStartupHelp(e)}</div>`); return; }
   const setupWanted = new URLSearchParams(location.search).has('setup');
   const email = FB.email();
   if (email) {
@@ -3687,17 +3724,17 @@ VIEWS.settings = {
     const data = `<div class="banner ${Cloud.active ? 'info' : 'warn'}"><div class="grow">${esc(Cloud.active ? t('cloud.reminder') : t('store.reminder'))}<br><span class="small">${esc(t('store.current', { mode: Cloud.active ? t('cloud.mode') : t('store.' + Store.mode) }))}</span></div></div>
       <div class="btn-row" style="margin-bottom:12px">
         <button type="button" class="btn primary" data-act="export-backup">⇩ ${esc(t('backup.export'))}</button>
-        <button type="button" class="btn" data-act="import-backup">⇧ ${esc(t('backup.import'))}</button>
-        ${demoN ? `<button type="button" class="btn danger" data-act="remove-demo">${esc(t('demo.remove'))} (${demoN})</button>` : ''}
+        ${canBulkEdit() ? `<button type="button" class="btn" data-act="import-backup">⇧ ${esc(t('backup.import'))}</button>` : ''}
+        ${demoN && canBulkEdit() ? `<button type="button" class="btn danger" data-act="remove-demo">${esc(t('demo.remove'))} (${demoN})</button>` : ''}
       </div>
       <details class="adv"><summary>${esc(t('set.advancedData'))}</summary>
       <div class="btn-row" style="margin-bottom:10px">
         <button type="button" class="btn" data-act="rp-create">${esc(t('rp.create'))}</button>
-        <button type="button" class="btn" data-act="load-demo">${esc(t('demo.load'))}</button>
-        <button type="button" class="btn danger solid" data-act="reset-all">${esc(t('reset.button'))}</button>
+        ${canBulkEdit() ? `<button type="button" class="btn" data-act="load-demo">${esc(t('demo.load'))}</button>
+        <button type="button" class="btn danger solid" data-act="reset-all">${esc(t('reset.button'))}</button>` : ''}
       </div>
       <h3 class="small" style="margin:0 0 4px">${esc(t('rp.title'))}</h3><p class="small muted" style="margin-top:0">${esc(t('rp.hint'))}</p>
-      ${rps === null ? `<p class="muted small">${esc(t('misc.loading'))}</p>` : rps.length ? `<ul class="list-plain">${rps.map(p => `<li><span style="flex:1"><strong>${u(p.label)}</strong><br><span class="small muted">${esc(new Date(p.at).toLocaleString(locale()))} · ${esc(t('misc.nEvents', { n: p.events }))}</span></span><button type="button" class="btn sm" data-rp-restore="${esc(p.id)}">${esc(t('rp.restore'))}</button><button type="button" class="btn sm" data-rp-download="${esc(p.id)}">⇩</button><button type="button" class="btn sm danger" data-rp-del="${esc(p.id)}" aria-label="${esc(t('act.remove'))}">✕</button></li>`).join('')}</ul>` : `<p class="muted small">${esc(t('rp.none'))}</p>`}
+      ${rps === null ? `<p class="muted small">${esc(t('misc.loading'))}</p>` : rps.length ? `<ul class="list-plain">${rps.map(p => `<li><span style="flex:1"><strong>${u(p.label)}</strong><br><span class="small muted">${esc(new Date(p.at).toLocaleString(locale()))} · ${esc(t('misc.nEvents', { n: p.events }))}</span></span>${canBulkEdit() ? `<button type="button" class="btn sm" data-rp-restore="${esc(p.id)}">${esc(t('rp.restore'))}</button>` : ''}<button type="button" class="btn sm" data-rp-download="${esc(p.id)}">⇩</button><button type="button" class="btn sm danger" data-rp-del="${esc(p.id)}" aria-label="${esc(t('act.remove'))}">✕</button></li>`).join('')}</ul>` : `<p class="muted small">${esc(t('rp.none'))}</p>`}
       </details>
       <p class="small muted">${esc(t('set.lastUpdated', { when: new Date(state.meta.updatedAt).toLocaleString(locale()) }))}</p>`;
     return `<div class="view-head"><h1>${esc(t('nav.settings'))}</h1><span class="small muted">${esc(t('set.autoSave'))}</span></div>
@@ -3838,6 +3875,7 @@ async function handleSettingsClick(b) {
     await addRestorePoint(t('rp.manualLabel')); refreshRestorePoints(); render(); toast(t('rp.created')); return true;
   }
   if (d.rpRestore) {
+    if (bulkBlocked()) return true;
     const list = await listRestorePoints(); const p = list.find(x => x.id === d.rpRestore); if (!p) return true;
     let parsed;
     try { parsed = JSON.parse(p.data); const v = validateData(parsed); if (!v.ok) throw new Error(v.errors.join(' ')); }
@@ -3852,6 +3890,7 @@ async function handleSettingsClick(b) {
     const list = (await listRestorePoints()).filter(x => x.id !== d.rpDel); await setRestorePoints(list); refreshRestorePoints(); render(); return true;
   }
   if (d.act === 'load-demo') {
+    if (bulkBlocked()) return true;
     const existingDemo = state.events.some(e => e.demo);
     if (!(await confirmDialog({ title: t('demo.load'), message: esc(existingDemo ? t('demo.loadMsgExisting') : t('demo.loadMsg')), ok: t('demo.load') }))) return true;
     const demo = buildDemoData();
@@ -3865,6 +3904,7 @@ async function handleSettingsClick(b) {
     toast(t('demo.loaded')); return true;
   }
   if (d.act === 'reset-all') {
+    if (bulkBlocked()) return true;
     const typed = await promptDialog({ title: t('reset.title'), message: esc(t('reset.msg')), label: t('reset.typeLabel'), multiline: false, ok: t('reset.button') });
     if (typed === null) return true;
     if (typed.trim().toUpperCase() !== 'RESET') { toast(t('reset.notConfirmed'), { type: 'error' }); return true; }
@@ -3877,6 +3917,7 @@ async function handleSettingsClick(b) {
 }
 
 async function removeDemoData() {
+  if (bulkBlocked()) return;
   const evs = state.events.filter(e => e.demo);
   const ovs = Object.entries(state.settings.dateOverrides).filter(([, o]) => o.demo);
   const pfs = state.performers.filter(p => p.demo);
@@ -4065,7 +4106,7 @@ function exportBackup() {
   toast(t('backup.done', { n: state.events.length }));
 }
 function importBackupFile(file) {
-  if (!file) return;
+  if (!file || bulkBlocked()) return;
   if (file.size > 25 * 1024 * 1024) { alertDialog(t('backup.invalid'), `<p>${esc(t('backup.tooLarge'))}</p>`); return; }
   const reader = new FileReader();
   reader.onerror = () => alertDialog(t('backup.invalid'), `<p>${esc(t('backup.readFail'))}</p>`);
@@ -4124,7 +4165,7 @@ function openExportDialog(initialTab = 'csv') {
       <button type="button" class="btn primary" id="x-print" style="margin-top:8px">🖨 ${esc(IS_ARTIFACT ? t('exp.printFile') : t('exp.printPdf'))}</button></div></section>
     <section class="card"><div class="card-h"><h3>${esc(t('exp.backupTitle'))}</h3></div><div class="card-b">
       <p class="small" style="margin-top:0">${esc(t('exp.backupHint'))}</p>
-      <div class="btn-row"><button type="button" class="btn primary" id="x-backup">⇩ ${esc(t('backup.export'))}</button><button type="button" class="btn" id="x-import">⇧ ${esc(t('backup.import'))}</button></div>
+      <div class="btn-row"><button type="button" class="btn primary" id="x-backup">⇩ ${esc(t('backup.export'))}</button>${canBulkEdit() ? `<button type="button" class="btn" id="x-import">⇧ ${esc(t('backup.import'))}</button>` : ''}</div>
       <p class="small muted">${esc(Cloud.active ? t('cloud.reminder') : t('store.reminder'))}</p></div></section>`;
   const h = Modal.open({ title: esc(t('act.exportPrint')), body, size: 'md', footer: `<span class="spacer"></span><button type="button" class="btn" data-close>${esc(t('act.close'))}</button>` });
   const $ = q => h.el.querySelector(q);
@@ -4140,7 +4181,7 @@ function openExportDialog(initialTab = 'csv') {
     h.close(true); doPrint(k, opts);
   });
   $('#x-backup').addEventListener('click', exportBackup);
-  $('#x-import').addEventListener('click', () => { h.close(true); document.getElementById('import-file').click(); });
+  if ($('#x-import')) $('#x-import').addEventListener('click', () => { h.close(true); document.getElementById('import-file').click(); });
   return h;
 }
 
@@ -4375,9 +4416,9 @@ document.addEventListener('click', async ev => {
     case 'undo': { const l = undo(); toast(l ? t('toast.undone') : t('toast.nothingUndo')); return; }
     case 'clear-filters': ui.filters = { q: '', cat: '', perf: '', res: '', status: '', type: '' }; render(); return;
     case 'remove-demo': removeDemoData(); return;
-    case 'cloud-seed-demo': { const d = buildDemoData(); commit('seed demo', st => { st.performers.push(...d.performers.filter(p => !st.performers.some(x => x.id === p.id))); st.events.push(...d.events); Object.assign(st.settings.dateOverrides, d.overrides); st.meta.demoLoaded = true; }); return; }
+    case 'cloud-seed-demo': if (bulkBlocked()) return; { const d = buildDemoData(); commit('seed demo', st => { st.performers.push(...d.performers.filter(p => !st.performers.some(x => x.id === p.id))); st.events.push(...d.events); Object.assign(st.settings.dateOverrides, d.overrides); st.meta.demoLoaded = true; }); return; }
     case 'export-backup': exportBackup(); return;
-    case 'import-backup': document.getElementById('import-file').click(); return;
+    case 'import-backup': if (bulkBlocked()) return; document.getElementById('import-file').click(); return;
     case 'show-ros': ui.view = 'table'; ui.table.mode = 'ros'; saveUI(); render(); return;
     case 'expand-all': ui.tl.collapsed = {}; saveUI(); render(); return;
     case 'tbl-market': ui.table.from = state.settings.marketStart; ui.table.to = state.settings.marketEnd; render(); return;
@@ -4468,7 +4509,7 @@ async function init() {
     if (IS_ARTIFACT || FB.active()) {
       document.getElementById('app').innerHTML = '<p style="padding:24px">Connecting to the shared schedule… / جارٍ الاتصال بالجدول المشترك…</p>';
       if (await Cloud.connect()) res = { state, problem: null, cloud: true };
-      else if (FB.active()) { document.getElementById('app').innerHTML = `<div style="padding:30px;font-family:sans-serif"><p>${esc(t('cloud.notConnected'))}</p></div>`; return; }
+      else if (FB.active()) { renderLanding._msg = 'fb.landingMsg'; landingShell(`<div style="text-align:start">${fbStartupHelp(Cloud.lastError)}</div>`); return; }
     }
     if (!res) res = await loadState();
     state = res.state;
