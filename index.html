@@ -89,7 +89,7 @@ bdi.t{unicode-bidi:isolate;white-space:nowrap}
 .btn.sm{padding:3px 8px;font-size:12.5px}
 .btn.icon{padding:5px 8px}
 .btn-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-input[type=text],input[type=search],input[type=date],input[type=time],input[type=number],input[type=email],input[type=color],select,textarea{border:1px solid var(--line);border-radius:6px;padding:5px 8px;background:#fff;min-height:32px}
+input[type=text],input[type=search],input[type=date],input[type=time],input[type=number],input[type=email],input[type=password],input[type=color],select,textarea{border:1px solid var(--line);border-radius:6px;padding:5px 8px;background:#fff;min-height:32px}
 input[type=color]{padding:2px;width:42px}
 textarea{min-height:60px;resize:vertical;width:100%}
 input:focus,select:focus,textarea:focus{border-color:var(--green-700);outline:2px solid rgba(31,92,67,.25);outline-offset:0}
@@ -507,7 +507,7 @@ const I18N = {
   'cloud.mode': ['Shared online', 'مشترك عبر الإنترنت'],
   'fb.signIn': ['Sign in to edit', 'تسجيل الدخول للتعديل'],
   'fb.signInTitle': ['Sign in to edit', 'تسجيل الدخول للتعديل'],
-  'fb.signInIntro': ['Use the email and password you were sent. You stay signed in on this browser until you sign out.', 'استخدم البريد الإلكتروني وكلمة المرور اللذين وصلاك. يبقى تسجيل دخولك على هذا المتصفح حتى تسجّل الخروج.'],
+  'fb.signInIntro': ['Sign in with Google, or with the email and password you were sent. You stay signed in on this browser until you sign out.', 'سجّل الدخول عبر Google، أو بالبريد الإلكتروني وكلمة المرور اللذين وصلاك. يبقى تسجيل دخولك على هذا المتصفح حتى تسجّل الخروج.'],
   'fb.email': ['Email', 'البريد الإلكتروني'],
   'fb.password': ['Password', 'كلمة المرور'],
   'fb.signInBtn': ['Sign in', 'تسجيل الدخول'],
@@ -527,6 +527,15 @@ const I18N = {
   'fb.role.admin': ['Admin', 'مسؤول'],
   'fb.role.editor': ['Editor', 'محرّر'],
   'fb.role.null': ['Viewer', 'مشاهد'],
+  'fb.role.owner': ['Owner (admin)', 'المالك (مسؤول)'],
+  'fb.google': ['Sign in with Google', 'تسجيل الدخول باستخدام Google'],
+  'fb.orEmail': ['or with email and password', 'أو بالبريد الإلكتروني وكلمة المرور'],
+  'fb.popupBlocked': ['The browser blocked the Google sign-in window. Allow pop-ups for this site and try again.', 'حظر المتصفح نافذة تسجيل الدخول عبر Google. اسمح بالنوافذ المنبثقة لهذا الموقع وحاول مجدداً.'],
+  'fb.domain': ['Google sign-in is not allowed on this web address yet. In Firebase, add it under Authentication → Settings → Authorized domains.', 'تسجيل الدخول عبر Google غير مسموح على هذا العنوان بعد. أضفه في Firebase ضمن Authentication ← Settings ← Authorized domains.'],
+  'fb.otherMethod': ['This email already signs in another way. Use email and password instead.', 'هذا البريد يسجّل الدخول بطريقة أخرى. استخدم البريد الإلكتروني وكلمة المرور بدلاً من ذلك.'],
+  'fb.cancelled': ['Sign-in was cancelled.', 'تم إلغاء تسجيل الدخول.'],
+  'fb.ownerOnly': ['Only the owner can set up a new schedule.', 'إعداد جدول جديد متاح للمالك فقط.'],
+  'fb.ownerOnlyWho': ['You signed in as {who}. Only {owner} can set up a new schedule.', 'سجّلت الدخول باسم {who}. إعداد جدول جديد متاح لـ {owner} فقط.'],
   'fb.roleHelp': ['Editors can change the schedule. Admins can also add and remove people here.', 'يمكن للمحرّرين تعديل الجدول. ويمكن للمسؤولين أيضاً إضافة الأشخاص وإزالتهم من هنا.'],
   'fb.shareTitle': ['Account and sharing', 'الحساب والمشاركة'],
   'fb.viewLink': ['Schedule link', 'رابط الجدول'],
@@ -569,14 +578,22 @@ const I18N = {
   'fb.sendReset': ['Send password reset', 'إرسال إعادة تعيين كلمة المرور'],
   'fb.resetConfirm': ['Firebase will email {email} a link to choose a new password.', 'سيرسل Firebase إلى {email} رابطاً لاختيار كلمة مرور جديدة.'],
   'fb.landingTitle': ['Amman Christmas Market — Entertainment Scheduler', 'سوق عمّان الميلادي — جدولة العروض الترفيهية'],
-  'fb.landingMsg': ['This schedule is private. Open it with the link you were given.', 'هذا الجدول خاص. افتحه باستخدام الرابط الذي حصلت عليه.'],
-  'fb.setup': ['Set up a new shared schedule', 'إعداد جدول مشترك جديد'],
+  'fb.landingMsg': ['Sign in', 'تسجيل الدخول'],
+  'fb.landingSignIn': ['Editors: sign in to open the schedule.', 'للمحرّرين: سجّل الدخول لفتح الجدول.'],
+  'fb.viewersHint': ['Only need to view? Open the schedule link you were given — no sign-in needed.', 'تحتاج إلى العرض فقط؟ افتح رابط الجدول الذي حصلت عليه، دون تسجيل دخول.'],
+  'fb.checking': ['One moment…', 'لحظة من فضلك…'],
+  'fb.signedInAsShort': ['Signed in as {email}.', 'مسجّل الدخول باسم {email}.'],
+  'fb.noAccess': ['This account has not been added as an editor yet. Ask the schedule’s admin to add you in the Editors tab.', 'لم تتم إضافة هذا الحساب كمحرّر بعد. اطلب من مسؤول الجدول إضافتك من تبويب «المحرّرون».'],
+  'fb.noScheduleYet': ['There is no shared schedule yet. Set one up to get started.', 'لا يوجد جدول مشترك بعد. أنشئ جدولاً للبدء.'],
+  'fb.setupAnother': ['Set up another schedule. The site’s sign-in page will open the new one from now on.', 'إعداد جدول آخر. ستفتح صفحة تسجيل الدخول الجدول الجديد من الآن فصاعداً.'],
+  'fb.setupBtn': ['Set up a new shared schedule', 'إعداد جدول مشترك جديد'],
+  'fb.setup': ['Owner: set up a new shared schedule', 'للمالك: إعداد جدول مشترك جديد'],
   'fb.createTitle': ['Set up a new shared schedule', 'إعداد جدول مشترك جديد'],
-  'fb.createIntro': ['You become this schedule’s admin. Enter the email and password you will sign in with.', 'ستصبح مسؤول هذا الجدول. أدخل البريد الإلكتروني وكلمة المرور اللذين ستسجّل الدخول بهما.'],
+  'fb.createIntro': ['Only the owner ({owner}) can set up schedules. Sign in with that Google account to create a new one.', 'إعداد الجداول متاح للمالك ({owner}) فقط. سجّل الدخول بحساب Google هذا لإنشاء جدول جديد.'],
   'fb.yourEmail': ['Your email', 'بريدك الإلكتروني'],
   'fb.yourPassword': ['Your password', 'كلمة مرورك'],
   'fb.createPwHelp': ['Write the password down somewhere safe. If you forget it, use “Forgot password?” on the sign-in screen.', 'دوّن كلمة المرور في مكان آمن. إذا نسيتها، استخدم «نسيت كلمة المرور؟» في شاشة تسجيل الدخول.'],
-  'fb.createBtn': ['Create schedule', 'إنشاء الجدول'],
+  'fb.createBtn': ['Sign in with Google and create', 'تسجيل الدخول عبر Google والإنشاء'],
   'fb.createdTitle': ['Your shared schedule is ready', 'جدولك المشترك جاهز'],
   'fb.createdMsg': ['Bookmark this page: this is the schedule’s link. Add editors in the new Editors tab. To bring in your existing schedule, use “Import backup”.', 'احفظ هذه الصفحة في المفضلة: هذا هو رابط الجدول. أضف المحرّرين من تبويب «المحرّرون» الجديد. لنقل جدولك الحالي، استخدم «استيراد نسخة احتياطية».'],
   'fb.notConfigured': ['This site is not connected to Firebase yet. Fill in firebase-config.js (see the README).', 'هذا الموقع غير متصل بـ Firebase بعد. املأ الملف firebase-config.js (راجع ملف README).'],
@@ -2096,12 +2113,25 @@ function renderSaveStatus() {
   return `<span class="save-status ${cls}" role="status" aria-live="polite" title="${esc(storeTxt + (s.error ? ' — ' + s.error : ''))}"><span class="dot" aria-hidden="true"></span>${esc(txt)}</span>`;
 }
 function updateSaveStatus() { const el = document.getElementById('save-status-slot'); if (el) el.innerHTML = renderSaveStatus(); }
-const LOGO = `<svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#7a1f2b" stroke="#b8913a" stroke-width="2"/><path d="M20 7l7 10h-4l6 8h-4l5 7H10l5-7h-4l6-8h-4z" fill="#2e7d5b" stroke="#e8f2ec" stroke-width=".8"/><rect x="18" y="32" width="4" height="4" fill="#b8913a"/><circle cx="20" cy="6.5" r="2" fill="#f2d27a"/></svg>`;
+const LOGO_SVG = `<svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#7a1f2b" stroke="#b8913a" stroke-width="2"/><path d="M20 7l7 10h-4l6 8h-4l5 7H10l5-7h-4l6-8h-4z" fill="#2e7d5b" stroke="#e8f2ec" stroke-width=".8"/><rect x="18" y="32" width="4" height="4" fill="#b8913a"/><circle cx="20" cy="6.5" r="2" fill="#f2d27a"/></svg>`;
+/* Custom logo: put a file named logo.png next to index.html and it replaces the built-in tree everywhere. */
+let customLogo = false;
+function logoHTML(px) {
+  const size = px ? `width:${px}px;height:${px}px;` : '';
+  return customLogo
+    ? `<img class="brand-mark" src="logo.png" alt="" style="${size}object-fit:contain;border-radius:6px">`
+    : (px ? LOGO_SVG.replace('class="brand-mark"', `class="brand-mark" style="${size}"`) : LOGO_SVG);
+}
+function checkCustomLogo(onFound) {
+  const img = new Image();
+  img.onload = () => { if (img.naturalWidth > 0) { customLogo = true; try { onFound(); } catch (e) { /* ignore */ } } };
+  img.src = 'logo.png';
+}
 function renderTopbar() {
   const nOpen = openConflicts().length;
   const nav = NAV.concat(FB.active() && Cloud.active && FB.isAdmin() ? ['people'] : []).map(k => `<button type="button" data-nav="${k}" ${ui.view === k ? 'aria-current="page"' : ''}>${esc(t('nav.' + k))}${k === 'conflicts' && nOpen ? `<span class="count" aria-label="${esc(t('conf.openCount', { n: nOpen }))}">${nOpen}</span>` : ''}</button>`).join('');
   return `<header class="topbar" role="banner">
-    <div class="brand">${LOGO}<div class="brand-text"><strong>${esc(t('app.short'))}</strong><span>${esc(t('app.subtitle', { range: fmtDateShort(state.settings.marketStart) + ' – ' + fmtDate(state.settings.marketEnd, { month: 'short', day: 'numeric', year: 'numeric' }) }))}</span></div></div>
+    <div class="brand">${logoHTML()}<div class="brand-text"><strong>${esc(t('app.short'))}</strong><span>${esc(t('app.subtitle', { range: fmtDateShort(state.settings.marketStart) + ' – ' + fmtDate(state.settings.marketEnd, { month: 'short', day: 'numeric', year: 'numeric' }) }))}</span></div></div>
     <nav class="nav" aria-label="${esc(t('nav.label'))}">${nav}</nav>
     <div class="topbar-end">
       ${FB.active() && Cloud.active ? (Cloud.readOnly ? `<button type="button" class="btn sm" data-act="fb-signin">🔒 ${esc(t('fb.signIn'))}</button>` : `<button type="button" class="btn sm" data-act="fb-share" title="${esc(FB.email() || '')}">👤 ${esc(t('fb.account'))}</button>`) : ''}
@@ -3137,19 +3167,25 @@ let _restorePointsCache = null;
    - Each shared schedule has a long random id carried in the link (?s=<id>).
      Anyone with the link can view (they are signed in anonymously, no account).
    - Editing needs an email + password account that an admin of this schedule
-     has added in the Editors tab (boards/<id>/members/<email>). firestore.rules
+     has added in the Editors tab (boards/<id>/members/<email>), or the owner
+     (FB_OWNER), who is admin of every schedule. Google sign-in works for anyone
+     whose Google email is on the list. firestore.rules
      check that membership on every write; removing someone ends their editing
      at once.
    - Each document is stored as { json: "<text>" } so the app's data shape
      never has to fit Firestore's field rules.
    ========================================================================== */
 const FB_SDK = 'https://www.gstatic.com/firebasejs/10.12.2/';
+/** The owner: always an admin of every schedule, and the only one who can set up new schedules. Must match firestore.rules. */
+const FB_OWNER = 'may16entertainment@gmail.com';
 const FB = {
   m: null, app: null, auth: null, fs: null, board: null, role: null, leaving: false, members: [], membersUnsub: null,
   configured() { const c = window.FIREBASE_CONFIG; return !!(c && c.apiKey && c.projectId && !/PASTE|YOUR_/i.test(c.apiKey + c.projectId)); },
   boardFromUrl() { const v = new URLSearchParams(location.search).get('s'); return v ? (/^[A-Za-z0-9_-]{16,64}$/.test(v) ? v : 'bad') : null; },
   active() { return !IS_ARTIFACT && this.configured() && !!this.board && this.board !== 'bad'; },
   isAdmin() { return this.role === 'admin'; },
+  /** Signed in as the owner with a verified email (Google sign-in is always verified). */
+  isOwner() { const u = this.auth && this.auth.currentUser; return !!(u && !u.isAnonymous && u.emailVerified && this.cleanEmail(u.email) === FB_OWNER); },
   newId() { const a = new Uint8Array(18); crypto.getRandomValues(a); return btoa(String.fromCharCode(...a)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); },
   suggestPassword() {
     const words = ['cedar', 'lantern', 'olive', 'citadel', 'amber', 'desert', 'garnet', 'harbor', 'jasmine', 'maple', 'meadow', 'orchid', 'pepper', 'saffron', 'silver', 'thyme', 'velvet', 'willow', 'zephyr', 'falcon', 'granite', 'hazel', 'ivory', 'juniper', 'kestrel', 'lotus', 'marble', 'nutmeg', 'opal', 'pebble', 'quartz', 'raven', 'sesame', 'tulip', 'umber', 'walnut', 'canyon', 'comet', 'ember', 'frost', 'glacier', 'honey', 'indigo', 'jade', 'lilac', 'mosaic', 'nectar', 'oasis'];
@@ -3170,6 +3206,10 @@ const FB = {
     if (/too-many-requests/.test(c)) return 'many';
     if (/network/.test(c)) return 'net';
     if (/operation-not-allowed|admin-restricted/.test(c)) return 'disabled';
+    if (/popup-closed-by-user|cancelled-popup-request|user-cancelled/.test(c)) return 'cancel';
+    if (/popup-blocked/.test(c)) return 'popup';
+    if (/unauthorized-domain/.test(c)) return 'domain';
+    if (/account-exists-with-different-credential/.test(c)) return 'otherMethod';
     return 'other';
   },
   async load() {
@@ -3211,7 +3251,8 @@ const FB = {
   async loadRole() {
     const email = this.email();
     this.role = null;
-    if (email) { try { const s = await this.m.getDoc(this.memberRef(email)); if (s.exists()) this.role = s.data().role === 'admin' ? 'admin' : 'editor'; } catch (e) { /* not a member */ } }
+    if (this.isOwner()) this.role = 'admin';
+    else if (email) { try { const s = await this.m.getDoc(this.memberRef(email)); if (s.exists()) this.role = s.data().role === 'admin' ? 'admin' : 'editor'; } catch (e) { /* not a member */ } }
     if (this.isAdmin()) this.watchMembers(); else this.stopMembers();
     return this.role;
   },
@@ -3223,10 +3264,28 @@ const FB = {
     }, () => { this.members = []; });
   },
   stopMembers() { if (this.membersUnsub) { this.membersUnsub(); this.membersUnsub = null; } this.members = []; },
+  async authWithEmail(email, password) {
+    try { await this.m.signInWithEmailAndPassword(this.auth, this.cleanEmail(email), password); return 'ok'; }
+    catch (e) { return this.authReason(e); }
+  },
+  async authWithGoogle() {
+    try { await this.m.signInWithPopup(this.auth, new this.m.GoogleAuthProvider()); return 'ok'; }
+    catch (e) { return this.authReason(e); }
+  },
+  /** The schedule the site opens for signed-in editors (null if none or no access). */
+  async homeBoard() {
+    try { const s = await this.m.getDoc(this.ref('site', 'home')); return s.exists() ? s.data().board : null; }
+    catch (e) { return null; }
+  },
   /** Returns 'ok', 'notMember', or an authReason. */
   async signIn(email, password) {
-    try { await this.m.signInWithEmailAndPassword(this.auth, this.cleanEmail(email), password); }
-    catch (e) { return this.authReason(e); }
+    const a = await this.authWithEmail(email, password); if (a !== 'ok') return a;
+    if (!(await this.loadRole())) { await this.signOut(); return 'notMember'; }
+    return 'ok';
+  },
+  /** Sign in with a Google account. Returns 'ok', 'notMember', or an authReason. */
+  async signInGoogle() {
+    const a = await this.authWithGoogle(); if (a !== 'ok') return a;
     if (!(await this.loadRole())) { await this.signOut(); return 'notMember'; }
     return 'ok';
   },
@@ -3257,21 +3316,20 @@ const FB = {
     await this.m.setDoc(this.memberRef(email), { role: role === 'admin' ? 'admin' : 'editor', addedBy: this.email(), addedAt: new Date().toISOString() }).catch(e => { throw this.err(e); });
   },
   async removeMember(email) { await this.m.deleteDoc(this.memberRef(email)).catch(e => { throw this.err(e); }); },
-  /** Set up a new schedule: create (or sign in to) the first admin's account, then the schedule and its admin membership. */
-  async create(email, password) {
+  /** Set up a new schedule. Only the owner can, signed in with Google. */
+  async create() {
     await this.load();
-    email = this.cleanEmail(email);
-    try { await this.m.createUserWithEmailAndPassword(this.auth, email, password); }
-    catch (e) {
-      const r = this.authReason(e);
-      if (r !== 'exists') return { error: r };
-      try { await this.m.signInWithEmailAndPassword(this.auth, email, password); } catch (e2) { return { error: 'existsBad' }; }
+    if (!this.isOwner()) {
+      try { await this.m.signInWithPopup(this.auth, new this.m.GoogleAuthProvider()); }
+      catch (e) { return { error: this.authReason(e) }; }
+      if (!this.isOwner()) { const who = this.email(); await this.signOut(); return { error: 'notOwner', who }; }
     }
     const id = this.newId();
     const batch = this.m.writeBatch(this.fs);
-    batch.set(this.ref('boards', id), { owner: email, createdAt: new Date().toISOString() });
-    batch.set(this.memberRef(email, id), { role: 'admin', addedBy: email, addedAt: new Date().toISOString() });
-    try { await batch.commit(); } catch (e) { return { error: 'other', msg: e.message }; }
+    batch.set(this.ref('boards', id), { owner: FB_OWNER, createdAt: new Date().toISOString() });
+    batch.set(this.ref('site', 'home'), { board: id, setAt: new Date().toISOString() }); // the site's sign-in page opens this schedule
+    try { await batch.commit(); }
+    catch (e) { return { error: 'other', msg: e.message }; }
     return { id };
   },
   shareLink(b) { return location.origin + location.pathname + '?s=' + (b || this.board); },
@@ -3281,7 +3339,7 @@ FB.board = FB.boardFromUrl();
 
 /** Message for an authReason code. */
 function fbReasonText(r, msg) {
-  const k = { bad: 'fb.badLogin', exists: 'fb.exists', weak: 'fb.pwShort', email: 'fb.badEmail', many: 'fb.tooMany', net: 'fb.network', disabled: 'fb.emailDisabled', notMember: 'fb.notMember', existsBad: 'fb.existsBad' }[r];
+  const k = { bad: 'fb.badLogin', exists: 'fb.exists', weak: 'fb.pwShort', email: 'fb.badEmail', many: 'fb.tooMany', net: 'fb.network', disabled: 'fb.emailDisabled', notMember: 'fb.notMember', existsBad: 'fb.existsBad', popup: 'fb.popupBlocked', domain: 'fb.domain', otherMethod: 'fb.otherMethod', notOwner: 'fb.ownerOnly', cancel: 'fb.cancelled' }[r];
   return k ? t(k) : t('fb.failed', { msg: msg || r });
 }
 async function copyText(text, fallbackInput) {
@@ -3293,6 +3351,7 @@ async function copyText(text, fallbackInput) {
     ta.remove(); return ok;
   }
 }
+const GOOGLE_G = '<svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true" style="flex:none"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.6-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.6-.4-3.5z"/></svg>';
 function fieldHTML(id, label, type = 'text', extra = '') {
   return `<label style="display:block;margin:10px 0 4px;font-weight:600" for="${id}">${esc(label)}</label>
     <input type="${type}" id="${id}" style="width:100%" ${extra}>`;
@@ -3303,7 +3362,9 @@ function fbSignInDialog() {
   const h = Modal.open({
     title: esc(t('fb.signInTitle')), size: 'sm',
     body: `<p style="margin-top:0">${esc(t('fb.signInIntro'))}</p>
-      ${fieldHTML('fb-em', t('fb.email'), 'email', 'autocomplete="username" dir="ltr" autofocus')}
+      <button type="button" class="btn" id="fb-google" style="width:100%;justify-content:center;padding:9px">${GOOGLE_G} ${esc(t('fb.google'))}</button>
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0 2px;color:var(--ink-3);font-size:12px"><span style="flex:1;border-top:1px solid var(--line)"></span>${esc(t('fb.orEmail'))}<span style="flex:1;border-top:1px solid var(--line)"></span></div>
+      ${fieldHTML('fb-em', t('fb.email'), 'email', 'autocomplete="username" dir="ltr"')}
       ${fieldHTML('fb-pw', t('fb.password'), 'password', 'autocomplete="current-password" dir="ltr"')}
       <p class="small" id="fb-err" style="color:var(--danger);min-height:1.4em;margin:6px 0 0" role="alert"></p>
       <button type="button" class="btn sm ghost" id="fb-forgot" style="padding-inline:0">${esc(t('fb.forgot'))}</button>`,
@@ -3320,6 +3381,13 @@ function fbSignInDialog() {
     else { err.textContent = fbReasonText(r); if (r === 'bad') $h('#fb-pw').select(); }
   };
   go.addEventListener('click', submit);
+  $h('#fb-google').addEventListener('click', async () => {
+    err.textContent = ''; $h('#fb-google').disabled = true;
+    const r = await FB.signInGoogle();
+    $h('#fb-google').disabled = false;
+    if (r === 'ok') { Cloud.readOnly = false; h.close(true); render(); toast(t('fb.signedIn')); }
+    else if (r !== 'cancel') err.textContent = fbReasonText(r);
+  });
   h.el.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }));
   $h('#fb-forgot').addEventListener('click', async () => {
     const em = FB.cleanEmail($h('#fb-em').value);
@@ -3332,7 +3400,7 @@ function fbAccountDialog() {
   const link = FB.shareLink();
   const h = Modal.open({
     title: esc(t('fb.shareTitle')),
-    body: `<p style="margin-top:0">${esc(t('fb.signedInAs', { email: FB.email(), role: t('fb.role.' + FB.role) }))}</p>
+    body: `<p style="margin-top:0">${esc(t('fb.signedInAs', { email: FB.email(), role: FB.isOwner() ? t('fb.role.owner') : t('fb.role.' + FB.role) }))}</p>
       <label style="display:block;margin:0 0 4px;font-weight:600" for="fb-link">${esc(t('fb.viewLink'))}</label>
       <div style="display:flex;gap:6px"><input type="text" id="fb-link" readonly value="${esc(link)}" style="flex:1;min-width:0" dir="ltr"><button type="button" class="btn" id="fb-copy">${esc(t('fb.copy'))}</button></div>
       <p class="small muted" style="margin:6px 0 0">${esc(t('fb.viewLinkHelp'))}</p>
@@ -3363,12 +3431,13 @@ VIEWS.people = {
         <div class="btn-row"><button type="button" class="btn primary" id="pp-copy">📋 ${esc(t('fb.copyInvite'))}</button><button type="button" class="btn ghost" id="pp-dismiss">${esc(t('fb.done'))}</button></div>`
         : `<p class="small" style="margin:0 0 8px">${esc(t('fb.inviteExistingHelp'))}</p><div class="btn-row"><button type="button" class="btn primary" id="pp-copy">📋 ${esc(t('fb.copyInvite'))}</button><button type="button" class="btn ghost" id="pp-dismiss">${esc(t('fb.done'))}</button></div>`}
       </div></section>` : '';
-    const rows = FB.members.map(p => `<tr>
+    const people = [{ email: FB_OWNER, role: 'owner' }].concat(FB.members.filter(p => p.email !== FB_OWNER));
+    const rows = people.map(p => `<tr>
         <td dir="ltr" style="text-align:start"><strong>${esc(p.email)}</strong>${p.email === me ? ` <span class="tag ack">${esc(t('fb.you'))}</span>` : ''}</td>
-        <td>${esc(t('fb.role.' + (p.role === 'admin' ? 'admin' : 'editor')))}</td>
+        <td>${esc(t('fb.role.' + (p.role === 'owner' ? 'owner' : p.role === 'admin' ? 'admin' : 'editor')))}</td>
         <td class="small muted">${p.addedAt ? esc(new Date(p.addedAt).toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: 'numeric' })) : ''}</td>
-        <td style="text-align:end;white-space:nowrap">${p.email === me ? '' : `<button type="button" class="btn sm" data-pp-reset="${esc(p.email)}">${esc(t('fb.sendReset'))}</button> <button type="button" class="btn sm danger" data-pp-remove="${esc(p.email)}">${esc(t('fb.remove'))}</button>`}</td></tr>`).join('');
-    return `<div class="view-head"><h1>${esc(t('nav.people'))}<small>${esc(t('fb.peopleCount', { n: FB.members.length }))}</small></h1></div>
+        <td style="text-align:end;white-space:nowrap">${p.email === me || p.role === 'owner' ? '' : `<button type="button" class="btn sm" data-pp-reset="${esc(p.email)}">${esc(t('fb.sendReset'))}</button> <button type="button" class="btn sm danger" data-pp-remove="${esc(p.email)}">${esc(t('fb.remove'))}</button>`}</td></tr>`).join('');
+    return `<div class="view-head"><h1>${esc(t('nav.people'))}<small>${esc(t('fb.peopleCount', { n: people.length }))}</small></h1></div>
       <p class="muted small" style="margin-top:0;max-width:760px">${esc(t('fb.peopleIntro'))}</p>
       ${invite}
       <section class="card" style="margin-bottom:14px;max-width:760px"><div class="card-h"><h2>${esc(t('fb.addTitle'))}</h2></div><div class="card-b">
@@ -3395,7 +3464,7 @@ VIEWS.people = {
       const email = FB.cleanEmail(emIn.value), role = $m('#pp-role').value;
       err.textContent = '';
       if (!FB.validEmail(email)) { err.textContent = t('fb.badEmail'); emIn.focus(); return; }
-      if (FB.members.some(p => p.email === email)) { err.textContent = t('fb.alreadyMember'); return; }
+      if (email === FB_OWNER || FB.members.some(p => p.email === email)) { err.textContent = t('fb.alreadyMember'); return; }
       add.disabled = true; add.textContent = t('fb.creating');
       const password = FB.suggestPassword();
       const r = await FB.createAccount(email, password);
@@ -3433,43 +3502,83 @@ VIEWS.people = {
 function fbCreateDialog() {
   const h = Modal.open({
     title: esc(t('fb.createTitle')), size: 'sm',
-    body: `<p style="margin-top:0">${esc(t('fb.createIntro'))}</p>
-      ${fieldHTML('fb-c-em', t('fb.yourEmail'), 'email', 'autocomplete="username" dir="ltr" autofocus')}
-      ${fieldHTML('fb-c1', t('fb.yourPassword'), 'text', 'autocomplete="off" dir="ltr" spellcheck="false"')}
-      <button type="button" class="btn sm" id="fb-c-sugg" style="margin-top:6px">${esc(t('fb.suggest'))}</button>
-      <p class="small muted" style="margin:8px 0 0">${esc(t('fb.createPwHelp'))}</p>
+    body: `<p style="margin-top:0">${esc(t('fb.createIntro', { owner: FB_OWNER }))}</p>
       <p class="small" id="fb-c-err" style="color:var(--danger);min-height:1.4em;margin:6px 0 0" role="alert"></p>`,
-    footer: `<span class="spacer"></span><button type="button" class="btn" data-close>${esc(t('act.cancel'))}</button><button type="button" class="btn primary" id="fb-c-go">${esc(t('fb.createBtn'))}</button>`
+    footer: `<span class="spacer"></span><button type="button" class="btn" data-close>${esc(t('act.cancel'))}</button><button type="button" class="btn primary" id="fb-c-go">${GOOGLE_G} ${esc(t('fb.createBtn'))}</button>`
   });
   const $h = s => h.el.querySelector(s);
-  $h('#fb-c-sugg').addEventListener('click', () => { $h('#fb-c1').value = FB.suggestPassword(); });
   $h('#fb-c-go').addEventListener('click', async () => {
-    const em = FB.cleanEmail($h('#fb-c-em').value), pw = $h('#fb-c1').value.trim(), err = $h('#fb-c-err');
-    if (!FB.validEmail(em)) { err.textContent = t('fb.badEmail'); return; }
-    if (pw.length < 8) { err.textContent = t('fb.pwShort'); return; }
-    $h('#fb-c-go').disabled = true; err.textContent = '';
-    const r = await FB.create(em, pw);
+    const err = $h('#fb-c-err'); err.textContent = ''; $h('#fb-c-go').disabled = true;
+    const r = await FB.create();
     if (r.id) { location.href = FB.shareLink(r.id) + '&new=1'; return; }
-    err.textContent = fbReasonText(r.error, r.msg); $h('#fb-c-go').disabled = false;
+    if (r.error !== 'cancel') err.textContent = r.error === 'notOwner' ? t('fb.ownerOnlyWho', { who: r.who || '', owner: FB_OWNER }) : fbReasonText(r.error, r.msg);
+    $h('#fb-c-go').disabled = false;
   });
 }
-/** Shown at the site's bare address once Firebase is set up: schedules open only from their link. */
-function renderLanding(msgKey) {
+/* ---------- The site's main address: a sign-in page ----------
+   Signed-in editors go straight to the schedule (site/home). Viewers open the
+   schedule link they were given. The owner can set up a schedule here
+   (add ?setup to the address to set up another one). */
+function landingShell(inner) {
   if (!state) state = buildInitialState(false);
   state.settings.language = currentLanguagePref();
   document.documentElement.lang = lang(); document.documentElement.dir = isRTL() ? 'rtl' : 'ltr';
   document.title = t('app.title');
-  document.getElementById('app').innerHTML = `<main id="main" style="max-width:560px;margin:8vh auto;padding:0 16px">
-    <div class="card"><div class="card-b" style="padding:28px;text-align:center">
-      ${LOGO.replace('class="brand-mark"', 'class="brand-mark" style="width:56px;height:56px"')}
-      <h1 style="font-size:20px;color:var(--green-900);margin:12px 0 8px">${esc(t('fb.landingTitle'))}</h1>
-      <p>${esc(t(msgKey))}</p>
-      ${msgKey === 'fb.notConfigured' ? '' : `<p style="margin-top:28px"><button type="button" class="btn" id="fb-new">${esc(t('fb.setup'))}</button></p>`}
-      <div class="lang-switch" style="display:inline-flex;margin-top:12px;border-color:var(--line)">
-        <button type="button" data-l="en" style="color:var(--ink)" aria-pressed="${lang() === 'en'}">English</button><button type="button" data-l="ar" style="color:var(--ink)" aria-pressed="${lang() === 'ar'}" lang="ar">العربية</button></div>
+  document.getElementById('app').innerHTML = `<main id="main" style="max-width:440px;margin:7vh auto;padding:0 16px">
+    <div class="card"><div class="card-b" style="padding:28px">
+      <div style="text-align:center">${logoHTML(72)}
+        <h1 style="font-size:19px;color:var(--green-900);margin:12px 0 4px">${esc(t('fb.landingTitle'))}</h1></div>
+      ${inner}
+      <div style="text-align:center"><div class="lang-switch" style="display:inline-flex;margin-top:18px;border-color:var(--line)">
+        <button type="button" data-l="en" style="color:var(--ink)" aria-pressed="${lang() === 'en'}">English</button><button type="button" data-l="ar" style="color:var(--ink)" aria-pressed="${lang() === 'ar'}" lang="ar">العربية</button></div></div>
     </div></div></main>`;
-  const nb = document.getElementById('fb-new'); if (nb) nb.addEventListener('click', fbCreateDialog);
-  document.querySelectorAll('#app [data-l]').forEach(b => b.addEventListener('click', () => { setLanguagePref(b.dataset.l); renderLanding(msgKey); }));
+  document.querySelectorAll('#app [data-l]').forEach(b => b.addEventListener('click', () => { setLanguagePref(b.dataset.l); renderLanding(renderLanding._msg); }));
+}
+async function renderLanding(msgKey) {
+  renderLanding._msg = msgKey;
+  if (msgKey === 'fb.notConfigured' || msgKey === 'fb.badLink') { landingShell(`<p style="text-align:center">${esc(t(msgKey))}</p>`); return; }
+  landingShell(`<p style="text-align:center" class="muted">${esc(t('fb.checking'))}</p>`);
+  try { await FB.load(); } catch (e) { landingShell(`<p style="text-align:center">${esc(t('cloud.notConnected'))}</p>`); return; }
+  const setupWanted = new URLSearchParams(location.search).has('setup');
+  const email = FB.email();
+  if (email) {
+    const home = await FB.homeBoard();
+    if (home && !(setupWanted && FB.isOwner())) { location.replace(FB.shareLink(home)); return; }
+    landingShell(`<p style="text-align:center">${esc(t('fb.signedInAsShort', { email }))}</p>
+      ${FB.isOwner()
+        ? `<p style="text-align:center" class="small muted">${esc(t(home ? 'fb.setupAnother' : 'fb.noScheduleYet'))}</p><p style="text-align:center;margin-top:18px"><button type="button" class="btn primary" id="fb-new">＋ ${esc(t('fb.setupBtn'))}</button></p>`
+        : `<div class="banner warn small" style="margin-top:12px"><div class="grow">${esc(t('fb.noAccess'))}</div></div>`}
+      <p style="text-align:center;margin-top:14px"><button type="button" class="btn sm ghost" id="fb-land-out">${esc(t('fb.signOut'))}</button></p>`);
+    const nb = document.getElementById('fb-new'); if (nb) nb.addEventListener('click', fbCreateDialog);
+    document.getElementById('fb-land-out').addEventListener('click', async () => { await FB.signOut(); renderLanding(msgKey); });
+    return;
+  }
+  landingShell(`<p style="text-align:center;margin:0 0 16px" class="muted">${esc(t('fb.landingSignIn'))}</p>
+    <button type="button" class="btn" id="fb-google" style="width:100%;justify-content:center;padding:9px">${GOOGLE_G} ${esc(t('fb.google'))}</button>
+    <div style="display:flex;align-items:center;gap:10px;margin:14px 0 2px;color:var(--ink-3);font-size:12px"><span style="flex:1;border-top:1px solid var(--line)"></span>${esc(t('fb.orEmail'))}<span style="flex:1;border-top:1px solid var(--line)"></span></div>
+    ${fieldHTML('fb-em', t('fb.email'), 'email', 'autocomplete="username" dir="ltr"')}
+    ${fieldHTML('fb-pw', t('fb.password'), 'password', 'autocomplete="current-password" dir="ltr"')}
+    <p class="small" id="fb-err" style="color:var(--danger);min-height:1.4em;margin:6px 0 0" role="alert"></p>
+    <button type="button" class="btn primary" id="fb-go" style="width:100%;justify-content:center;padding:9px">${esc(t('fb.signInBtn'))}</button>
+    <p style="text-align:center;margin:8px 0 0"><button type="button" class="btn sm ghost" id="fb-forgot">${esc(t('fb.forgot'))}</button></p>
+    <p class="small muted" style="text-align:center;margin:14px 0 0;border-top:1px solid var(--line-2);padding-top:12px">${esc(t('fb.viewersHint'))}</p>`);
+  const $a = sel => document.querySelector('#app ' + sel), err = $a('#fb-err');
+  const after = r => { if (r === 'ok') renderLanding(msgKey); else if (r !== 'cancel') { err.style.color = 'var(--danger)'; err.textContent = fbReasonText(r); } };
+  $a('#fb-google').addEventListener('click', async () => { err.textContent = ''; $a('#fb-google').disabled = true; const r = await FB.authWithGoogle(); $a('#fb-google').disabled = false; after(r); });
+  const submit = async () => {
+    const em = FB.cleanEmail($a('#fb-em').value), pw = $a('#fb-pw').value;
+    if (!em || !pw) { (em ? $a('#fb-pw') : $a('#fb-em')).focus(); return; }
+    err.textContent = ''; $a('#fb-go').disabled = true;
+    const r = await FB.authWithEmail(em, pw); $a('#fb-go').disabled = false; after(r);
+  };
+  $a('#fb-go').addEventListener('click', submit);
+  document.querySelectorAll('#app input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }));
+  $a('#fb-forgot').addEventListener('click', async () => {
+    const em = FB.cleanEmail($a('#fb-em').value);
+    if (!FB.validEmail(em)) { err.style.color = 'var(--danger)'; err.textContent = t('fb.forgotNeedEmail'); $a('#fb-em').focus(); return; }
+    try { await FB.resetPassword(em); err.style.color = 'var(--ok)'; err.textContent = t('fb.resetSent', { email: em }); }
+    catch (e) { err.style.color = 'var(--danger)'; err.textContent = fbReasonText(FB.authReason(e), e.message); }
+  });
 }
 
 VIEWS.settings = {
@@ -4346,6 +4455,11 @@ window.addEventListener('beforeunload', e => { if (SaveState.status === 'dirty' 
 
 /* ---------- Startup ---------- */
 async function init() {
+  // swap in logo.png wherever the logo is already on screen; later renders use it directly
+  checkCustomLogo(() => document.querySelectorAll('svg.brand-mark').forEach(svg => {
+    const img = document.createElement('img'); img.className = 'brand-mark'; img.src = 'logo.png'; img.alt = '';
+    img.style.cssText = (svg.getAttribute('style') || '') + ';object-fit:contain;border-radius:6px'; svg.replaceWith(img);
+  }));
   try {
     await Store.init();
     let res;

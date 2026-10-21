@@ -1,7 +1,7 @@
 # Amman Christmas Market — Entertainment Scheduler
 
 Two ways to use it:
-- **Shared online (GitHub Pages + Firebase):** everyone with the schedule's link sees the same schedule live; only people you add in the **Editors** tab can sign in (email + password) and change it. Setup is in section 0 below.
+- **Shared online (GitHub Pages + Firebase):** everyone with the schedule's link sees the same schedule live; only people you add in the **Editors** tab can sign in (Google, or email + password) and change it. The site's main address is a sign-in page that takes editors straight to the schedule. The owner, **may16entertainment@gmail.com**, is admin of every schedule. Setup is in section 0 below.
 - **Offline:** double-click `index.html` on any computer. Everything is saved in that browser only.
 
 Files: `index.html` (the app), `firebase-config.js` (which Firebase project to use), `firestore.rules` (who may read and write), `README.md` (this guide).
@@ -16,6 +16,7 @@ You need a free Google account (for Firebase) and a free GitHub account. Never p
 3. In the left menu open **Build → Authentication**, click **Get started**, and open the **Sign-in method** tab. Turn on two providers:
    - **Email/Password**: switch the first toggle **on** (leave *Email link* off) and **Save**. Editors sign in with this.
    - **Anonymous**: switch it **on** and **Save**. Viewers use this behind the scenes; they never create an account.
+   - **Google**: click **Add new provider → Google**, switch it **on**, pick your email as the *support email*, and **Save**. The owner signs in with this, and so can any editor whose Google email you add.
 4. In the left menu open **Build → Firestore Database** and click **Create database**. Pick a location close to Jordan (for example a Europe location) and choose **production mode**. Click **Create**.
 5. In Firestore, open the **Rules** tab. Delete everything in the box, paste the entire contents of `firestore.rules`, and click **Publish**.
 6. Click the gear icon next to *Project Overview* → **Project settings**. Under **Your apps**, click the web icon **`</>`**. Give it a nickname (e.g. `scheduler`), leave *Firebase Hosting* unticked, and click **Register app**.
@@ -26,24 +27,31 @@ You need a free Google account (for Firebase) and a free GitHub account. Never p
 2. Click **uploading an existing file** and drag in `index.html`, `firebase-config.js`, `firestore.rules` and `README.md`. Click **Commit changes**.
 3. Open **Settings → Pages**. Under *Build and deployment* choose **Deploy from a branch**, branch **main**, folder **/ (root)**, and **Save**.
 4. After a minute or two, refresh that page: it shows your site address, like `https://yourname.github.io/amman-market-schedule/`.
-5. Back in Firebase: **Authentication → Settings → Authorized domains → Add domain**, and add `yourname.github.io` (your GitHub username + `.github.io`).
+5. Back in Firebase: **Authentication → Settings → Authorized domains → Add domain**, and add `yourname.github.io` (your GitHub username + `.github.io`). Google sign-in does not work until this is done.
 
 ### C. Create the shared schedule
-1. Open your site address. It says the schedule is private. Click **Set up a new shared schedule**.
-2. Enter **your email** and a **password** for yourself (or click *Suggest a password*), and click **Create schedule**. You become the schedule's **admin**. Keep the password somewhere safe; if you forget it, use *Forgot password?* on the sign-in screen.
-3. The schedule opens with its own private link (`…/?s=…`). **Bookmark it.** This link is the schedule; the bare site address does not show it.
-4. To bring in the schedule you already built: in your offline `index.html`, *Export backup (JSON)*; then on the shared page click **Import backup** (or use the button on the empty-schedule banner).
+1. Open your site address. It shows the sign-in page.
+2. Click **Sign in with Google** and choose **may16entertainment@gmail.com**. Only this account can set up schedules; it is written into `index.html` (`FB_OWNER`) and `firestore.rules`.
+3. Click **Set up a new shared schedule**, then **Sign in with Google and create**.
+4. The schedule opens with its own private link (`…/?s=…`). From now on, signing in at the main address opens it directly. Viewers still need this link, so bookmark it.
+5. To bring in the schedule you already built: in your offline `index.html`, *Export backup (JSON)*; then on the shared page click **Import backup** (or use the button on the empty-schedule banner).
 
 ### D. Share it
 - **To let someone view:** send them the link (top bar → **👤 Account** → *Copy*).
 - **To let someone edit:** open the **Editors** tab (admins only), type their email, choose **Editor** (or **Admin** if they should also manage people) and click **Create**. A password is made for them. Click **Copy invitation** — it copies the link, their email and password — and paste it into a message to them. The password is shown only once, so copy it before leaving the page.
-- **How editors sign in:** they open the link, click **🔒 Sign in to edit**, and enter their email and password. They stay signed in on that browser until they choose *Sign out* (under 👤 Account).
+- **How editors sign in:** they go to the site's main address and sign in (Google, or the email and password from the invitation), and the schedule opens. Or they open the schedule link and click **🔒 Sign in to edit**. They stay signed in on that browser until they choose *Sign out* (under 👤 Account). Someone with a Gmail address can use **Sign in with Google** instead of the generated password.
 - **Forgotten password:** they click *Forgot password?* on the sign-in screen, or an admin clicks **Send password reset** next to their name. Firebase emails them a link to choose a new one (check spam).
 - **To remove someone's editing access:** **Editors** tab → **Remove**. It takes effect immediately; they can still view if they have the link.
 - **To remove someone's viewing access:** the link cannot be changed. Export a backup, set up a new shared schedule, import the backup, and share the new link.
 
-### E. Updating the app later
+### E. Changing the logo
+Make a square image (PNG, about 256 × 256 pixels, transparent background looks best), name it exactly **`logo.png`**, and upload it to the repository next to `index.html`. It replaces the Christmas-tree logo in the top bar and on the sign-in page within a couple of minutes. Delete `logo.png` to go back to the tree.
+
+### F. Updating the app later
 Upload a new `index.html` to the repository the same way (it replaces the old one). The schedule data lives in Firebase and is not affected.
+
+### G. Setting up another schedule (owner)
+Go to the main address with `?setup` on the end (for example `https://yourname.github.io/amman-market-schedule/?setup`), signed in as the owner, and choose *Set up a new shared schedule*. The sign-in page opens the newest schedule from then on; older ones still work from their own links.
 
 ## 1. Opening it
 1. Save `index.html` anywhere (e.g. a shared drive folder or your desktop).
@@ -103,15 +111,15 @@ Automated in headless Chromium against the built `index.html` (102/102 checks pa
 - Exports: CSV BOM, row counts, escaping of commas/quotes/line breaks, Arabic preserved, day/range/filtered scopes; all four print reports rendered to PDF (portrait run of show; landscape others) with the UI hidden.
 - Arabic/accessibility: lang/dir switch, Arabic labels and editor, chronological RTL axis and block positions; every visible control has an accessible name in every view; no network requests; no JavaScript errors.
 
-Shared online version: tested in two headless Chromium browsers against a stand-in for Firebase that applies the same access rules (34/34 checks): set-up as admin, the Editors tab (add, invalid/duplicate emails refused, invitation text and clipboard copy, remove, re-adding an existing account, password reset), viewers and non-members unable to edit, editors unable to add people, live sync both ways, a removed editor dropped to view-only with the unsaved change reverted, sign-in surviving reload, sign-out, the Arabic Editors tab, and the offline file still working. Not yet run against a live Firebase project.
+Shared online version: tested in headless Chromium against a stand-in for Firebase that applies the same access rules: the Editors tab and invitations (34/34 checks), plus the sign-in main page, Google sign-in, the owner account, owner-only set-up, editors taken straight to the schedule, strangers and a fake unverified "owner" account refused, Arabic sign-in page, and logo.png (34/35; the one failure was the test stand-in losing a connection when the test navigated away, not the app). Not yet run against a live Firebase project.
 
 Not verified automatically: Firefox/Safari (tested in Chromium only), real touch-screen dragging, and the browser’s own print dialog (the print layout was verified by generating PDFs directly).
 
 ## 6. Limitations
 - Offline version: storage is per browser profile, with no sync. Use the shared online version (section 0) to work together.
-- Shared online version: needs an internet connection. Anyone with the link can view, so share it only with people who should see it. The site address itself is public (it shows only the “private schedule” page), and anyone visiting it could set up their own separate schedule in your Firebase project; they cannot see or change yours. Firebase's free plan is far more than one market schedule needs.
+- Shared online version: needs an internet connection. Anyone with the schedule link can view, so share it only with people who should see it. The site's main address is public but shows only the sign-in page; only the owner can set up schedules. Firebase's free plan is far more than one market schedule needs.
 - The app records who may edit, but not who made each individual change.
-- Admins cannot remove themselves (so a schedule always has an admin); another admin can remove them.
+- Admins cannot remove themselves; another admin can remove them. The owner (may16entertainment@gmail.com) can never be removed and is admin of every schedule. To hand ownership to another Google account, change the email in both `index.html` (`FB_OWNER`) and `firestore.rules`, then upload/publish both.
 - Accounts belong to your Firebase project, not to one schedule. Removing someone from the Editors list ends their editing but keeps their account; adding them again later re-uses it (they keep their old password). To delete accounts completely, use Firebase → Authentication → Users.
 - PDF uses the browser’s print dialog (“Save as PDF”), not a one-click file download — this keeps the app fully offline with no external library.
 - Native date/time pickers follow the computer’s locale (e.g. mm/dd/yyyy, AM/PM) rather than the app language.
