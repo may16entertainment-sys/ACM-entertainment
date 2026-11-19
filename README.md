@@ -46,6 +46,15 @@ You need a free Google account (for Firebase) and a free GitHub account. Never p
 - **To remove someone's editing access:** **Editors** tab → **Remove**. It takes effect immediately; they can still view if they have the link.
 - **To remove someone's viewing access:** the link cannot be changed. Export a backup, set up a new shared schedule, import the backup, and share the new link.
 
+### Logistics tab (editors only)
+The **Logistics** tab (between Warnings and Settings) is visible only to signed-in editors and admins. People with just the schedule link never see it, and the database refuses to send it to them.
+- **Acts:** one row per act, using your performers list. Type a name and click **Add act** to add one, or rename an act in its row (this renames it everywhere). **Schedule** fills in from the timeline: an act's performances appear there once you choose that act as the *performer* on its events. **Total after tax** = Pay + Tax %. Everything else is typed in and saves when you leave the field.
+- **Technical riders:** click **＋ Upload PDF** on an act's row (PDF only, up to 10 MB each, several per act allowed). Click a file's name to download it, or ✕ to remove it.
+- **Technical riders for a day:** pick a day and click **Download riders for this day**. You get one PDF for the A/V and stage team: a cover sheet listing each act's times, stage, sound check and contact, followed by every rider for that day, with each rider's first page labelled. Acts with no rider are flagged on the cover sheet. Password-protected PDFs may not merge; the cover sheet says so, and you send those separately. The cover sheet is in English; Arabic letters in names show as “?”.
+- **Schools:** click **Add school** and fill in performance date, name, number of students and staff, and complimentary tickets. Totals are shown underneath.
+- In the offline file the Logistics tab works, but riders can only be uploaded in the shared online version.
+- After updating `firestore.rules` in Firebase (Firestore → Rules → Publish), riders and logistics work without any paid Firebase plan.
+
 ### E. Changing the logo
 Make a square image (PNG, about 256 × 256 pixels, transparent background looks best), name it exactly **`logo.png`**, and upload it to the repository next to `index.html`. It replaces the Christmas-tree logo in the top bar and on the sign-in page within a couple of minutes. Delete `logo.png` to go back to the tree.
 
@@ -113,7 +122,7 @@ Automated in headless Chromium against the built `index.html` (102/102 checks pa
 - Exports: CSV BOM, row counts, escaping of commas/quotes/line breaks, Arabic preserved, day/range/filtered scopes; all four print reports rendered to PDF (portrait run of show; landscape others) with the UI hidden.
 - Arabic/accessibility: lang/dir switch, Arabic labels and editor, chronological RTL axis and block positions; every visible control has an accessible name in every view; no network requests; no JavaScript errors.
 
-Shared online version: tested in headless Chromium against a stand-in for Firebase that applies the same access rules: the Editors tab and invitations (34/34 checks), plus the sign-in main page, Google sign-in, the owner account, owner-only set-up, editors taken straight to the schedule, strangers and a fake unverified "owner" account refused, Arabic sign-in page, and logo.png (34/35; the one failure was the test stand-in losing a connection when the test navigated away, not the app). Not yet run against a live Firebase project.
+Shared online version: tested in headless Chromium against a stand-in for Firebase that applies the same access rules: the Editors tab and invitations (34/34 checks), plus the sign-in main page, Google sign-in, the owner account, owner-only set-up, editors taken straight to the schedule, strangers and a fake unverified "owner" account refused, Arabic sign-in page, and logo.png (34/35; the one failure was the test stand-in losing a connection when the test navigated away, not the app). Not yet run against a live Firebase project. Logistics tab: 35/35 checks in three browsers (owner, editor, viewer): fields, totals, renaming, schools, PDF-only uploads, a 1.6 MB rider stored in pieces and downloaded byte-for-byte identical, the per-day PDF (cover sheet plus the right rider pages), viewers blocked from logistics and riders, live sync between owner and editor without losing typing, and the offline file.
 
 Not verified automatically: Firefox/Safari (tested in Chromium only), real touch-screen dragging, and the browser’s own print dialog (the print layout was verified by generating PDFs directly).
 
